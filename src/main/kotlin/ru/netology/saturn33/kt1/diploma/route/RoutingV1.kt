@@ -43,16 +43,9 @@ class RoutingV1(
                 }
 
                 authenticate {
-                    route("/me") {
-                        get {
-                            val me = call.authentication.principal<UserModel>()
-                            call.respond(UserResponseDto.fromModel(me!!))
-                        }
-                    }
-
                     route("/token") {
                         post {
-                            val input = call.receive<PushRequestParamsDto>()
+                            val input = call.receive<PushTokenRequestDto>()
                             val me = call.authentication.principal<UserModel>()
                             val response = userService.saveToken(me!!, input)
                             call.respond(response)
@@ -68,34 +61,21 @@ class RoutingV1(
 
                     route("/posts") {
                         //main post operations
-                        get {
-                            val me = call.authentication.principal<UserModel>()
-                            val response = postService.getAll(me!!)
-                            call.respond(response)
-                        }
-                        get("/recent/{count}") {
+                        get("/recent/{userId}/{count}") {
+                            val userId = call.parameters["userId"]?.toLongOrNull() ?: throw ParameterConversionException("userid", "Long")
                             val count = call.parameters["count"]?.toIntOrNull() ?: throw ParameterConversionException("count", "Int")
                             val me = call.authentication.principal<UserModel>()
-                            val response = postService.getLast(me!!, count)
+
+                            val response = postService.getLast(me!!, userId, count)
                             call.respond(response)
                         }
-                        get("/after/{id}") {
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val me = call.authentication.principal<UserModel>()
-                            val response = postService.getAfter(me!!, id)
-                            call.respond(response)
-                        }
-                        get("/before/{id}/{count}") {
+                        get("/before/{userId}/{id}/{count}") {
+                            val userId = call.parameters["userId"]?.toLongOrNull() ?: throw ParameterConversionException("userid", "Long")
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
                             val count = call.parameters["count"]?.toIntOrNull() ?: throw ParameterConversionException("count", "Int")
                             val me = call.authentication.principal<UserModel>()
-                            val response = postService.getBefore(me!!, id, count)
-                            call.respond(response)
-                        }
-                        get("/{id}") {
-                            val me = call.authentication.principal<UserModel>()
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val response = postService.getById(me!!, id, true)
+
+                            val response = postService.getBefore(me!!, userId, id, count)
                             call.respond(response)
                         }
                         post {
@@ -104,45 +84,27 @@ class RoutingV1(
                             val response = postService.save(me!!, input)
                             call.respond(response)
                         }
-                        delete("/{id}") {
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val me = call.authentication.principal<UserModel>()
-                            postService.delete(me!!, id)
-                            call.respond("")
-                        }
 
                         //likes
-                        post("/{id}/like") {
+                        post("/{id}/promote") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
                             val me = call.authentication.principal<UserModel>()
-                            val response = postService.like(me!!, id)
+                            val response = postService.promote(me!!, id)
                             call.respond(response)
                         }
-                        delete("/{id}/like") {
+                        post("/{id}/demote") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
                             val me = call.authentication.principal<UserModel>()
-                            val response = postService.dislike(me!!, id)
+                            val response = postService.demote(me!!, id)
                             call.respond(response)
                         }
 
-                        //repost
-                        post("/{id}/repost") {
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val input = call.receive<PostRequestDto>()
-                            val me = call.authentication.principal<UserModel>()
-
-                            val response = postService.repost(me!!, id, input)
+                        //reactions
+                        get("/reactions/{postId}") {
+                            val postId = call.parameters["postId"]?.toLongOrNull() ?: throw ParameterConversionException("postId", "Long")
+                            val response = postService.getReactions(postId)
                             call.respond(response)
                         }
-
-/*
-                        //share
-                        post("/{id}/share") {
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val response = postService.share(id)
-                            call.respond(response)
-                        }
-*/
                     }
 
                     //загрузка media

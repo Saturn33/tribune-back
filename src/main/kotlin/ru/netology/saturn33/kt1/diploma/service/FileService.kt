@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.netology.saturn33.kt1.diploma.exception.BadRequestException
 import ru.netology.saturn33.kt1.diploma.model.AttachmentModel
-import ru.netology.saturn33.kt1.diploma.model.AttachmentType
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -48,7 +47,7 @@ class FileService(private val uploadPath: String) {
                             }
                         }
                         part.dispose()
-                        response = AttachmentModel(name, AttachmentType.IMAGE)
+                        response = AttachmentModel(name)
                         return@forEachPart
                     }
                 }

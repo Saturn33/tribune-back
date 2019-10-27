@@ -6,5 +6,8 @@ data class UserModel(
     val id: Long = 0,
     val username: String,
     val password: String,
-    val token: PushToken? = null
+    val badge: UserBadge? = null,
+    val avatar: AttachmentModel? = null,
+    val token: PushToken? = null,
+    val readOnly: Boolean = false
 ) : Principal

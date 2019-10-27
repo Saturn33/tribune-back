@@ -28,23 +28,15 @@ class UserService(
         return UserResponseDto.fromModel(model)
     }
 
-    suspend fun changePassword(id: Long, input: PasswordChangeRequestDto) {
-        mutex.withLock {
-            val model = repo.getById(id) ?: throw NotFoundException()
-            if (!passwordEncoder.matches(input.old, model.password)) {
-                throw PasswordChangeException("Wrong password!")
-            }
-            val copy = model.copy(password = passwordEncoder.encode(input.new))
-            repo.save(copy)
-        }
-    }
-
     suspend fun register(input: RegistrationRequestDto): AuthenticationResponseDto {
         mutex.withLock {
             if (repo.getByUsername(input.username) != null) throw BadRequestException("Пользователь с таким логином уже зарегистрирован")
-            val model = repo.save(UserModel(username = input.username, password = passwordEncoder.encode(input.password)))
+            val model = repo.save(UserModel(
+                username = input.username,
+                password = passwordEncoder.encode(input.password)
+            ))
             val token = tokenService.generate(model.id)
-            return AuthenticationResponseDto(token)
+            return AuthenticationResponseDto(token, model.readOnly)
         }
     }
 
@@ -55,15 +47,15 @@ class UserService(
         }
 
         val token = tokenService.generate(model.id)
-        return AuthenticationResponseDto(token)
+        return AuthenticationResponseDto(token, model.readOnly)
     }
 
-    suspend fun save(username: String, password: String) {
-        repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
+    suspend fun save(username: String, password: String, readOnly: Boolean) {
+        repo.save(UserModel(username = username, password = passwordEncoder.encode(password), readOnly = readOnly))
         return
     }
 
-    suspend fun saveToken(user: UserModel, input: PushRequestParamsDto) {
+    suspend fun saveToken(user: UserModel, input: PushTokenRequestDto) {
         mutex.withLock {
             val copy = user.copy(token = PushToken(input.token))
             repo.save(copy)

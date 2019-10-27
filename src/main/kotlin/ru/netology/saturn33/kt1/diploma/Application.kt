@@ -97,8 +97,8 @@ fun Application.module() {
         bind<UserService>() with eagerSingleton {
             UserService(instance(), instance(), instance()).apply {
                 runBlocking {
-                    this@apply.save("vasya", "password")
-                    this@apply.save("petya", "password")
+                    this@apply.save("vasya", "password", false)
+                    this@apply.save("petya", "password", true)
                 }
             }
         }
