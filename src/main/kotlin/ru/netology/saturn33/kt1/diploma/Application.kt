@@ -24,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.netology.saturn33.kt1.diploma.dto.ErrorResponseDto
 import ru.netology.saturn33.kt1.diploma.exception.*
+import ru.netology.saturn33.kt1.diploma.model.UserBadge
 import ru.netology.saturn33.kt1.diploma.repository.PostRepository
 import ru.netology.saturn33.kt1.diploma.repository.PostRepositoryInMemoryWithMutexImpl
 import ru.netology.saturn33.kt1.diploma.repository.UserRepository
@@ -97,8 +98,9 @@ fun Application.module() {
         bind<UserService>() with eagerSingleton {
             UserService(instance(), instance(), instance()).apply {
                 runBlocking {
-                    this@apply.save("vasya", "password", false)
-                    this@apply.save("petya", "password", true)
+                    this@apply.save("vasya", "password", false, null)
+                    this@apply.save("petya", "password", true, UserBadge.PROMOTER)
+                    this@apply.save("andrey", "password", true, UserBadge.HATER)
                 }
             }
         }

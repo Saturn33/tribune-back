@@ -7,8 +7,9 @@ import ru.netology.saturn33.kt1.diploma.dto.*
 import ru.netology.saturn33.kt1.diploma.exception.BadRequestException
 import ru.netology.saturn33.kt1.diploma.exception.InvalidPasswordException
 import ru.netology.saturn33.kt1.diploma.exception.NotFoundException
-import ru.netology.saturn33.kt1.diploma.exception.PasswordChangeException
+import ru.netology.saturn33.kt1.diploma.model.AttachmentModel
 import ru.netology.saturn33.kt1.diploma.model.PushToken
+import ru.netology.saturn33.kt1.diploma.model.UserBadge
 import ru.netology.saturn33.kt1.diploma.model.UserModel
 import ru.netology.saturn33.kt1.diploma.repository.UserRepository
 
@@ -28,13 +29,19 @@ class UserService(
         return UserResponseDto.fromModel(model)
     }
 
+    fun getProfile(userModel: UserModel): ProfileResponseDto {
+        return ProfileResponseDto.fromModel(userModel)
+    }
+
     suspend fun register(input: RegistrationRequestDto): AuthenticationResponseDto {
         mutex.withLock {
             if (repo.getByUsername(input.username) != null) throw BadRequestException("Пользователь с таким логином уже зарегистрирован")
-            val model = repo.save(UserModel(
-                username = input.username,
-                password = passwordEncoder.encode(input.password)
-            ))
+            val model = repo.save(
+                UserModel(
+                    username = input.username,
+                    password = passwordEncoder.encode(input.password)
+                )
+            )
             val token = tokenService.generate(model.id)
             return AuthenticationResponseDto(token, model.readOnly)
         }
@@ -50,14 +57,21 @@ class UserService(
         return AuthenticationResponseDto(token, model.readOnly)
     }
 
-    suspend fun save(username: String, password: String, readOnly: Boolean) {
-        repo.save(UserModel(username = username, password = passwordEncoder.encode(password), readOnly = readOnly))
+    suspend fun save(username: String, password: String, readOnly: Boolean, badge: UserBadge?, avatar: AttachmentModel? = null) {
+        repo.save(UserModel(username = username, password = passwordEncoder.encode(password), readOnly = readOnly, badge = badge, avatar = avatar))
         return
     }
 
     suspend fun saveToken(user: UserModel, input: PushTokenRequestDto) {
         mutex.withLock {
             val copy = user.copy(token = PushToken(input.token))
+            repo.save(copy)
+        }
+    }
+
+    suspend fun saveProfile(user: UserModel, input: ProfileRequestDto) {
+        mutex.withLock {
+            val copy = user.copy(avatar = input.avatar)
             repo.save(copy)
         }
     }

@@ -49,12 +49,11 @@ class RoutingV1(
                             val me = call.authentication.principal<UserModel>()
                             val response = userService.saveToken(me!!, input)
                             call.respond(response)
-                            //TODO remove; it's only for testing with problem #1
-                            postService.sendSimplePush(me.id, "Welcome push", "Welcome, ${me.username}")
                         }
                         delete("/{id}") {
                             val userId = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val response = userService.deleteToken(userService.getModelById(userId)!!)
+                            val model = userService.getModelById(userId)
+                            val response = if (model != null) userService.deleteToken(model) else throw ParameterConversionException("id", "Long")
                             call.respond(response)
                         }
                     }
@@ -103,6 +102,21 @@ class RoutingV1(
                         get("/reactions/{postId}") {
                             val postId = call.parameters["postId"]?.toLongOrNull() ?: throw ParameterConversionException("postId", "Long")
                             val response = postService.getReactions(postId)
+                            call.respond(response)
+                        }
+                    }
+
+                    route("/profile") {
+                        //profile operations
+                        get {
+                            val me = call.authentication.principal<UserModel>()
+                            val response = userService.getProfile(me!!)
+                            call.respond(response)
+                        }
+                        post {
+                            val me = call.authentication.principal<UserModel>()
+                            val input = call.receive<ProfileRequestDto>()
+                            val response = userService.saveProfile(me!!, input)
                             call.respond(response)
                         }
                     }
