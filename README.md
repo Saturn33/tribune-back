@@ -1,4 +1,4 @@
-# netology-kt12-back
-Приложение: https://netology-kt12.herokuapp.com/
+# netology-kt1-diploma
+Приложение: https://netology-kt1-diploma.herokuapp.com/
 
-Запросы по полному URL: https://netology-kt12.herokuapp.com/api/v1/...
+Запросы по полному URL: https://netology-kt1-diploma.herokuapp.com/api/v1/...
