@@ -82,4 +82,14 @@ class UserService(
             repo.save(copy)
         }
     }
+
+    suspend fun setRO(userId: Long, readOnly: Boolean) {
+        mutex.withLock {
+            val model = getModelById(userId) ?: throw NotFoundException("User not found")
+            val copy = model.copy(readOnly = readOnly)
+            println(copy)
+            repo.save(copy)
+        }
+    }
+
 }

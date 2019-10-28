@@ -42,7 +42,7 @@ class UserRepositoryInMemoryWithMutexImpl : UserRepository {
                     copy
                 }
                 else -> {
-                    val copy = items[index].copy(username = item.username, password = item.password, token = item.token, avatar = item.avatar)
+                    val copy = items[index].copy(username = item.username, password = item.password, token = item.token, avatar = item.avatar, readOnly = item.readOnly)
                     items[index] = copy
                     copy
                 }

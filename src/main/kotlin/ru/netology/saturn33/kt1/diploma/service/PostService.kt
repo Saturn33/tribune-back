@@ -1,10 +1,12 @@
 package ru.netology.saturn33.kt1.diploma.service
 
+import ru.netology.saturn33.kt1.diploma.REDUCER_LIMIT
 import ru.netology.saturn33.kt1.diploma.dto.PostRequestDto
 import ru.netology.saturn33.kt1.diploma.dto.PostResponseDto
 import ru.netology.saturn33.kt1.diploma.dto.ReactionResponseDto
 import ru.netology.saturn33.kt1.diploma.exception.ForbiddenException
 import ru.netology.saturn33.kt1.diploma.exception.NotFoundException
+import ru.netology.saturn33.kt1.diploma.extensions.reducer
 import ru.netology.saturn33.kt1.diploma.model.PostModel
 import ru.netology.saturn33.kt1.diploma.model.UserModel
 import ru.netology.saturn33.kt1.diploma.repository.PostRepository
@@ -16,6 +18,11 @@ class PostService(
     private val validatorService: ValidatorService,
     private val fcmService: FCMService
 ) {
+
+    suspend fun getRO(userId: Long): Boolean {
+        return repo.getRO(userId)
+    }
+
     suspend fun getLast(currentUser: UserModel, userId: Long, count: Int): List<PostResponseDto> {
         return repo.getLast(userId, count).map { PostResponseDto.fromModel(currentUser, userService.getModelById(it.author)!!, it) }
     }
@@ -49,16 +56,23 @@ class PostService(
 
     suspend fun promote(user: UserModel, id: Long): PostResponseDto {
         val model = repo.promoteById(user, id) ?: throw NotFoundException()
-        val postText = if (model.text.length > 20) model.text.substring(0, 20) + "..." else model.text
+        val postText = model.text.reducer(REDUCER_LIMIT)
         sendSimplePush(model.author, "Your post promoted", "${user.username} поддержал вашу идею '${postText}'")
+        recalcReadOnlyforUser(model.author)
         return PostResponseDto.fromModel(user, userService.getModelById(model.author)!!, model)
     }
 
     suspend fun demote(user: UserModel, id: Long): PostResponseDto {
         val model = repo.demoteById(user, id) ?: throw NotFoundException()
-        val postText = if (model.text.length > 20) model.text.substring(0, 20) + "..." else model.text
+        val postText = model.text.reducer(REDUCER_LIMIT)
         sendSimplePush(model.author, "Your post demoted", "${user.username} против вашей идеи '${postText}'")
+        recalcReadOnlyforUser(model.author)
         return PostResponseDto.fromModel(user, userService.getModelById(model.author)!!, model)
+    }
+
+    suspend fun recalcReadOnlyforUser(userId: Long) {
+        val ro = getRO(userId)
+        userService.setRO(userId, ro)
     }
 
     suspend fun getReactions(postId: Long): List<ReactionResponseDto> {

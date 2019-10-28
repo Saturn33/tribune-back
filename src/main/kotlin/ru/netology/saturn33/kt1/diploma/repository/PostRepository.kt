@@ -6,6 +6,7 @@ import ru.netology.saturn33.kt1.diploma.model.UserModel
 
 
 interface PostRepository {
+    suspend fun getRO(userId: Long): Boolean
     suspend fun getLast(userId: Long, count: Int): List<PostModel>
     suspend fun getBefore(id: Long, userId: Long, count: Int): List<PostModel>
     suspend fun getById(id: Long, incrementViews: Boolean = false): PostModel?

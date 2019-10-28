@@ -100,7 +100,7 @@ fun Application.module() {
                 runBlocking {
                     this@apply.save("vasya", "password", false, null)
                     this@apply.save("petya", "password", true, UserBadge.PROMOTER)
-                    this@apply.save("andrey", "password", true, UserBadge.HATER)
+                    this@apply.save("andrey", "password", false, UserBadge.HATER)
                 }
             }
         }

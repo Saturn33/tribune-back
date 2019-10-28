@@ -2,6 +2,7 @@ package ru.netology.saturn33.kt1.diploma.repository
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ru.netology.saturn33.kt1.diploma.READ_ONLY_CAP
 import ru.netology.saturn33.kt1.diploma.model.PostModel
 import ru.netology.saturn33.kt1.diploma.model.Reaction
 import ru.netology.saturn33.kt1.diploma.model.ReactionType
@@ -13,6 +14,14 @@ class PostRepositoryInMemoryWithMutexImpl : PostRepository {
     private var nextId = 1L
     private val items = mutableListOf<PostModel>()
     private val mutex = Mutex()
+
+    override suspend fun getRO(userId: Long): Boolean {
+        mutex.withLock {
+            val filteredList = items.filter { userId == it.author && it.demotes.size >= READ_ONLY_CAP && it.promotes.isEmpty() }
+            println(filteredList.size)
+            return filteredList.isNotEmpty()
+        }
+    }
 
     override suspend fun getLast(userId: Long, count: Int): List<PostModel> {
         mutex.withLock {
