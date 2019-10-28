@@ -18,7 +18,6 @@ class PostRepositoryInMemoryWithMutexImpl : PostRepository {
     override suspend fun getRO(userId: Long): Boolean {
         mutex.withLock {
             val filteredList = items.filter { userId == it.author && it.demotes.size >= READ_ONLY_CAP && it.promotes.isEmpty() }
-            println(filteredList.size)
             return filteredList.isNotEmpty()
         }
     }
@@ -67,7 +66,7 @@ class PostRepositoryInMemoryWithMutexImpl : PostRepository {
 
     override suspend fun promoteById(user: UserModel, id: Long): PostModel? {
         mutex.withLock {
-            return when (val index = items.indexOfFirst { it.id == id }) {
+            return when (val index = items.indexOfFirst { it.id == id && it.author != user.id}) {
                 -1 -> null
                 else -> {
                     val item = items[index]
@@ -93,7 +92,7 @@ class PostRepositoryInMemoryWithMutexImpl : PostRepository {
 
     override suspend fun demoteById(user: UserModel, id: Long): PostModel? {
         mutex.withLock {
-            return when (val index = items.indexOfFirst { it.id == id }) {
+            return when (val index = items.indexOfFirst { it.id == id && it.author != user.id}) {
                 -1 -> null
                 else -> {
                     val item = items[index]

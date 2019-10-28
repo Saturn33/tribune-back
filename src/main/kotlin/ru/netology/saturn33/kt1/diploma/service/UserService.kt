@@ -87,7 +87,6 @@ class UserService(
         mutex.withLock {
             val model = getModelById(userId) ?: throw NotFoundException("User not found")
             val copy = model.copy(readOnly = readOnly)
-            println(copy)
             repo.save(copy)
         }
     }
