@@ -2,7 +2,8 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 .gradle
-/uploads/
+/uploads/*
+!/uploads/2b07bd6c-30fb-4e49-8127-7d3045291327.jpg
 /fcm/*
 !/fcm/.gitkeep
 !/fcm/fcm-encrypted.json

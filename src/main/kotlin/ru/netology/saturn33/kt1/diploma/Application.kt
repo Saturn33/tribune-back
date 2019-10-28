@@ -23,7 +23,9 @@ import org.kodein.di.ktor.kodein
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.netology.saturn33.kt1.diploma.dto.ErrorResponseDto
+import ru.netology.saturn33.kt1.diploma.dto.PostRequestDto
 import ru.netology.saturn33.kt1.diploma.exception.*
+import ru.netology.saturn33.kt1.diploma.model.AttachmentModel
 import ru.netology.saturn33.kt1.diploma.model.UserBadge
 import ru.netology.saturn33.kt1.diploma.repository.PostRepository
 import ru.netology.saturn33.kt1.diploma.repository.PostRepositoryInMemoryWithMutexImpl
@@ -31,6 +33,7 @@ import ru.netology.saturn33.kt1.diploma.repository.UserRepository
 import ru.netology.saturn33.kt1.diploma.repository.UserRepositoryInMemoryWithMutexImpl
 import ru.netology.saturn33.kt1.diploma.route.RoutingV1
 import ru.netology.saturn33.kt1.diploma.service.*
+import kotlin.random.Random
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -92,7 +95,6 @@ fun Application.module() {
         bind<JWTTokenService>() with eagerSingleton { JWTTokenService(instance("jwt-secret"), instance("jwt-expire")) }
         bind<PostRepository>() with eagerSingleton { PostRepositoryInMemoryWithMutexImpl() }
         bind<UserRepository>() with eagerSingleton { UserRepositoryInMemoryWithMutexImpl() }
-        bind<PostService>() with eagerSingleton { PostService(instance(), instance(), instance(), instance()) }
         bind<ValidatorService>() with eagerSingleton { ValidatorService() }
         bind<FileService>() with eagerSingleton { FileService(instance("upload-dir")) }
         bind<UserService>() with eagerSingleton {
@@ -101,6 +103,17 @@ fun Application.module() {
                     this@apply.save("vasya", "password", false, null)
                     this@apply.save("petya", "password", true, UserBadge.PROMOTER)
                     this@apply.save("andrey", "password", false, UserBadge.HATER)
+                }
+            }
+        }
+        bind<PostService>() with eagerSingleton {
+            PostService(instance(), instance(), instance(), instance()).apply {
+                runBlocking {
+                    val vasya = userService.getModelById(1)!!
+                    val andrey = userService.getModelById(3)!!
+                    for (i in 1..20) {
+                        this@apply.save(if (Random.nextBoolean()) vasya else andrey, PostRequestDto("qwe$i", null, AttachmentModel("2b07bd6c-30fb-4e49-8127-7d3045291327.jpg")))
+                    }
                 }
             }
         }

@@ -14,7 +14,7 @@ import java.util.*
 
 class PostService(
     private val repo: PostRepository,
-    private val userService: UserService,
+    internal val userService: UserService,
     private val validatorService: ValidatorService,
     private val fcmService: FCMService
 ) {
