@@ -41,6 +41,7 @@ class PostService(
             date = Date().time,
             author = user.id,
             text = input.text,
+            link = input.link,
             attachment = input.attachment
         )
         return PostResponseDto.fromModel(user, user, repo.save(model))

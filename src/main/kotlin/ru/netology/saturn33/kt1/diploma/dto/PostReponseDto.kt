@@ -10,6 +10,7 @@ data class PostResponseDto(
     val date: Long,
     val author: UserResponseDto,
     val text: String,
+    val link: String?,
     val promotes: Int,
     val promotedByMe: Boolean,
     val demotes: Int,
@@ -26,6 +27,7 @@ data class PostResponseDto(
             demotes = model.demotes.size,
             demotedByMe = model.demotes.find { it.uid == currentUser.id } != null,
             text = model.text,
+            link = model.link,
             attachment = model.attachment
         )
     }

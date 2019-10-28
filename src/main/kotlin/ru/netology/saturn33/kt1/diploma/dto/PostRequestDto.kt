@@ -4,5 +4,6 @@ import ru.netology.saturn33.kt1.diploma.model.AttachmentModel
 
 data class PostRequestDto(
     val text: String,
+    val link: String?,
     val attachment: AttachmentModel
 )

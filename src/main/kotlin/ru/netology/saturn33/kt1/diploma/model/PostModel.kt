@@ -7,6 +7,7 @@ data class PostModel(
     val date: Long,
     val author: Long,
     val text: String,
+    val link: String?,
     val promotes: List<Reaction> = listOf(),
     val demotes: List<Reaction> = listOf(),
     val views: Int = 0,
