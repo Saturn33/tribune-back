@@ -60,7 +60,7 @@ class PostService(
     suspend fun promote(user: UserModel, id: Long): PostResponseDto {
         val model = repo.promoteById(user, id) ?: throw NotFoundException()
         val postText = model.text.reducer(REDUCER_LIMIT)
-        sendSimplePush(model.author, "Your post promoted", "${user.username} поддержал вашу идею '${postText}'")
+        sendSimplePush(id, model.author, "Your post promoted", "${user.username} поддержал вашу идею '${postText}'")
         recalcReadOnlyforUser(model.author)
         userService.increasePromotes(user.id)
         recalcBadgeforUser()
@@ -70,7 +70,7 @@ class PostService(
     suspend fun demote(user: UserModel, id: Long): PostResponseDto {
         val model = repo.demoteById(user, id) ?: throw NotFoundException()
         val postText = model.text.reducer(REDUCER_LIMIT)
-        sendSimplePush(model.author, "Your post demoted", "${user.username} против вашей идеи '${postText}'")
+        sendSimplePush(id, model.author, "Your post demoted", "${user.username} против вашей идеи '${postText}'")
         recalcReadOnlyforUser(model.author)
         userService.increaseDemotes(user.id)
         recalcBadgeforUser()
@@ -102,10 +102,10 @@ class PostService(
         return repo.getReactions(postId).map { ReactionResponseDto.fromModel(userService.getModelById(it.uid)!!, it) }
     }
 
-    suspend fun sendSimplePush(userId: Long, title: String, text: String) {
+    suspend fun sendSimplePush(postId: Long, userId: Long, title: String, text: String) {
         val model = userService.getModelById(userId)
         if (model?.token != null) {
-            fcmService.send(userId, model.token.token, title, text)
+            fcmService.send(userId, model.token.token, postId, title, text)
         }
     }
 

@@ -27,12 +27,13 @@ class FCMService(dbUrl: String, password: String, salt: String, path: String) {
         FirebaseApp.initializeApp(options)
     }
 
-    suspend fun send(recipientId: Long, recipientToken: String, title: String, text: String) = withContext(Dispatchers.IO) {
+    suspend fun send(recipientId: Long, recipientToken: String, postId: Long, title: String, text: String) = withContext(Dispatchers.IO) {
         try {
             val message = Message.builder()
                 .putData("recipientId", recipientId.toString())
                 .putData("title", title)
                 .putData("text", text)
+                .putData("postId", postId.toString())
                 .setToken(recipientToken)
                 .build()
 
