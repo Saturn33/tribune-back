@@ -20,6 +20,10 @@ class UserService(
 ) {
     private val mutex = Mutex()
 
+    suspend fun getAllUsers(): List<UserModel> {
+        return repo.getAll()
+    }
+
     suspend fun getModelById(id: Long): UserModel? {
         return repo.getById(id)
     }
@@ -91,4 +95,27 @@ class UserService(
         }
     }
 
+    suspend fun setBadge(userId: Long, badge: UserBadge?) {
+        mutex.withLock {
+            val model = getModelById(userId) ?: throw NotFoundException("User not found")
+            val copy = model.copy(badge = badge)
+            repo.save(copy)
+        }
+    }
+
+    suspend fun increasePromotes(userId: Long) {
+        mutex.withLock {
+            val model = getModelById(userId) ?: throw NotFoundException("User not found")
+            val copy = model.copy(promotes = model.promotes + 1)
+            repo.save(copy)
+        }
+    }
+
+    suspend fun increaseDemotes(userId: Long) {
+        mutex.withLock {
+            val model = getModelById(userId) ?: throw NotFoundException("User not found")
+            val copy = model.copy(demotes = model.demotes + 1)
+            repo.save(copy)
+        }
+    }
 }

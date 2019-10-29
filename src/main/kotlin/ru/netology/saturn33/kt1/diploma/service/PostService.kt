@@ -1,5 +1,7 @@
 package ru.netology.saturn33.kt1.diploma.service
 
+import ru.netology.saturn33.kt1.diploma.BADGE_MIN
+import ru.netology.saturn33.kt1.diploma.BADGE_TOP
 import ru.netology.saturn33.kt1.diploma.REDUCER_LIMIT
 import ru.netology.saturn33.kt1.diploma.dto.PostRequestDto
 import ru.netology.saturn33.kt1.diploma.dto.PostResponseDto
@@ -8,6 +10,7 @@ import ru.netology.saturn33.kt1.diploma.exception.ForbiddenException
 import ru.netology.saturn33.kt1.diploma.exception.NotFoundException
 import ru.netology.saturn33.kt1.diploma.extensions.reducer
 import ru.netology.saturn33.kt1.diploma.model.PostModel
+import ru.netology.saturn33.kt1.diploma.model.UserBadge
 import ru.netology.saturn33.kt1.diploma.model.UserModel
 import ru.netology.saturn33.kt1.diploma.repository.PostRepository
 import java.util.*
@@ -15,7 +18,6 @@ import java.util.*
 class PostService(
     private val repo: PostRepository,
     internal val userService: UserService,
-    private val validatorService: ValidatorService,
     private val fcmService: FCMService
 ) {
 
@@ -59,6 +61,8 @@ class PostService(
         val postText = model.text.reducer(REDUCER_LIMIT)
         sendSimplePush(model.author, "Your post promoted", "${user.username} поддержал вашу идею '${postText}'")
         recalcReadOnlyforUser(model.author)
+        userService.increasePromotes(user.id)
+        recalcBadgeforUser()
         return PostResponseDto.fromModel(user, userService.getModelById(model.author)!!, model)
     }
 
@@ -67,10 +71,28 @@ class PostService(
         val postText = model.text.reducer(REDUCER_LIMIT)
         sendSimplePush(model.author, "Your post demoted", "${user.username} против вашей идеи '${postText}'")
         recalcReadOnlyforUser(model.author)
+        userService.increaseDemotes(user.id)
+        recalcBadgeforUser()
         return PostResponseDto.fromModel(user, userService.getModelById(model.author)!!, model)
     }
 
-    suspend fun recalcReadOnlyforUser(userId: Long) {
+    private suspend fun recalcBadgeforUser() {
+        val allUsers = userService.getAllUsers()
+        val promoteUsers = allUsers.sortedByDescending { it.promotes }
+        val demoteUsers = allUsers.sortedByDescending { it.demotes }
+
+        allUsers.forEach { userService.setBadge(it.id, null) }
+        promoteUsers.take(BADGE_TOP).forEach {
+            if (it.promotes > BADGE_MIN && it.promotes > it.demotes * 2)
+                userService.setBadge(it.id, UserBadge.PROMOTER)
+        }
+        demoteUsers.take(BADGE_TOP).forEach {
+            if (it.demotes > BADGE_MIN && it.demotes > it.promotes * 2)
+                userService.setBadge(it.id, UserBadge.HATER)
+        }
+    }
+
+    private suspend fun recalcReadOnlyforUser(userId: Long) {
         val ro = getRO(userId)
         userService.setRO(userId, ro)
     }

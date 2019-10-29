@@ -26,7 +26,6 @@ import ru.netology.saturn33.kt1.diploma.dto.ErrorResponseDto
 import ru.netology.saturn33.kt1.diploma.dto.PostRequestDto
 import ru.netology.saturn33.kt1.diploma.exception.*
 import ru.netology.saturn33.kt1.diploma.model.AttachmentModel
-import ru.netology.saturn33.kt1.diploma.model.UserBadge
 import ru.netology.saturn33.kt1.diploma.repository.PostRepository
 import ru.netology.saturn33.kt1.diploma.repository.PostRepositoryInMemoryWithMutexImpl
 import ru.netology.saturn33.kt1.diploma.repository.UserRepository
@@ -95,19 +94,18 @@ fun Application.module() {
         bind<JWTTokenService>() with eagerSingleton { JWTTokenService(instance("jwt-secret"), instance("jwt-expire")) }
         bind<PostRepository>() with eagerSingleton { PostRepositoryInMemoryWithMutexImpl() }
         bind<UserRepository>() with eagerSingleton { UserRepositoryInMemoryWithMutexImpl() }
-        bind<ValidatorService>() with eagerSingleton { ValidatorService() }
         bind<FileService>() with eagerSingleton { FileService(instance("upload-dir")) }
         bind<UserService>() with eagerSingleton {
             UserService(instance(), instance(), instance()).apply {
                 runBlocking {
                     this@apply.save("vasya", "password", false, null)
-                    this@apply.save("petya", "password", true, UserBadge.PROMOTER)
-                    this@apply.save("andrey", "password", false, UserBadge.HATER)
+                    this@apply.save("petya", "password", true, null)
+                    this@apply.save("andrey", "password", false, null)
                 }
             }
         }
         bind<PostService>() with eagerSingleton {
-            PostService(instance(), instance(), instance(), instance()).apply {
+            PostService(instance(), instance(), instance()).apply {
                 runBlocking {
                     val vasya = userService.getModelById(1)!!
                     val andrey = userService.getModelById(3)!!

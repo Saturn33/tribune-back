@@ -41,6 +41,14 @@ class RoutingV1(
                         call.respond(response)
                     }
                 }
+                route("/token") {
+                    delete("/{id}") {
+                        val userId = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
+                        val model = userService.getModelById(userId)
+                        val response = if (model != null) userService.deleteToken(model) else throw ParameterConversionException("id", "Long")
+                        call.respond(response)
+                    }
+                }
 
                 authenticate {
                     route("/token") {
@@ -48,12 +56,6 @@ class RoutingV1(
                             val input = call.receive<PushTokenRequestDto>()
                             val me = call.authentication.principal<UserModel>()
                             val response = userService.saveToken(me!!, input)
-                            call.respond(response)
-                        }
-                        delete("/{id}") {
-                            val userId = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException("id", "Long")
-                            val model = userService.getModelById(userId)
-                            val response = if (model != null) userService.deleteToken(model) else throw ParameterConversionException("id", "Long")
                             call.respond(response)
                         }
                     }

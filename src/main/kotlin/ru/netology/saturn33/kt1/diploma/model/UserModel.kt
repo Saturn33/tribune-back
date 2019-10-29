@@ -7,6 +7,8 @@ data class UserModel(
     val username: String,
     val password: String,
     val badge: UserBadge? = null,
+    val promotes: Long = 0,
+    val demotes: Long = 0,
     val avatar: AttachmentModel? = null,
     val token: PushToken? = null,
     val readOnly: Boolean = false

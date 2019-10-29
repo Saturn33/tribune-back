@@ -6,7 +6,7 @@ const val REDUCER_LIMIT = 20
 const val READ_ONLY_CAP = 3L
 
 //сколько реакций одного типа должен проявить пользователь, чтобы получить соответствующий бадж
-const val BADGE_MIN = 10L
+const val BADGE_MIN = 5L
 
 //пользователь должен входить в TOP-N по количеству реакций одного типа, чтобы получить соответствующий бадж
-const val BADGE_TOP = 5L
+const val BADGE_TOP = 3
