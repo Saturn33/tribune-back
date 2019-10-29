@@ -1,6 +1,7 @@
 package ru.netology.saturn33.kt1.diploma.service
 
 import ru.netology.saturn33.kt1.diploma.BADGE_MIN
+import ru.netology.saturn33.kt1.diploma.BADGE_TIMES
 import ru.netology.saturn33.kt1.diploma.BADGE_TOP
 import ru.netology.saturn33.kt1.diploma.REDUCER_LIMIT
 import ru.netology.saturn33.kt1.diploma.dto.PostRequestDto
@@ -83,11 +84,11 @@ class PostService(
 
         allUsers.forEach { userService.setBadge(it.id, null) }
         promoteUsers.take(BADGE_TOP).forEach {
-            if (it.promotes > BADGE_MIN && it.promotes > it.demotes * 2)
+            if (it.promotes > BADGE_MIN && it.promotes > it.demotes * BADGE_TIMES)
                 userService.setBadge(it.id, UserBadge.PROMOTER)
         }
         demoteUsers.take(BADGE_TOP).forEach {
-            if (it.demotes > BADGE_MIN && it.demotes > it.promotes * 2)
+            if (it.demotes > BADGE_MIN && it.demotes > it.promotes * BADGE_TIMES)
                 userService.setBadge(it.id, UserBadge.HATER)
         }
     }
