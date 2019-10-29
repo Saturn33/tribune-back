@@ -99,7 +99,7 @@ fun Application.module() {
             UserService(instance(), instance(), instance()).apply {
                 runBlocking {
                     this@apply.save("vasya", "password", false, null)
-                    this@apply.save("petya", "password", true, null)
+                    this@apply.save("petya", "password", false, null)
                     this@apply.save("andrey", "password", false, null)
                 }
             }
@@ -108,10 +108,13 @@ fun Application.module() {
             PostService(instance(), instance(), instance()).apply {
                 runBlocking {
                     val vasya = userService.getModelById(1)!!
+                    val petya = userService.getModelById(2)!!
                     val andrey = userService.getModelById(3)!!
                     for (i in 1..20) {
                         this@apply.save(if (Random.nextBoolean()) vasya else andrey, PostRequestDto("qwe$i", null, AttachmentModel("2b07bd6c-30fb-4e49-8127-7d3045291327.jpg")))
                     }
+                    this@apply.save(petya, PostRequestDto("Выпустите меня из RO", "https://google.com/", AttachmentModel("2b07bd6c-30fb-4e49-8127-7d3045291327.jpg")))
+                    userService.setRO(2, true)
                 }
             }
         }
