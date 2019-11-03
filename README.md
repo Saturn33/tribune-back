@@ -1,4 +1,4 @@
-# netology-kt1-diploma
+# tribune-back
 
 Дипломный проект курса kt-1 Нетологии по заданию https://github.com/Saturn33/bkt-diploma. Серверная часть.
 
