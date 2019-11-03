@@ -1,5 +1,8 @@
 # netology-kt1-diploma
-Приложение: https://github.com/Saturn33/tribune
+
+Дипломный проект курса kt-1 Нетологии по заданию https://github.com/Saturn33/bkt-diploma. Серверная часть.
+
+Приложение находится в репозитории https://github.com/Saturn33/tribune
 
 Запросы по полному URL: https://netology-kt1-diploma.herokuapp.com/api/v1/...
 
